@@ -270,6 +270,8 @@ test_promote_requires_and_records_the_delivery_contract() {
   assert_grep 'yolo=on' "$meta" "promotion did not record the decided merge posture"
   assert_contains "$out" "ship instructions for mode=direct-PR" "promotion hint did not carry the decided mode"
   [ "$(grep -c '^mode=' "$meta")" = 1 ] || fail "promotion left more than one mode= line in the task record"
+  assert_grep '# Commit and PR conventions' "$instructions_path" \
+    "promoted ship instructions dropped the Conventional Commits rules"
   pass "fm-promote: promotion requires the delivery contract and records it exactly once"
 }
 

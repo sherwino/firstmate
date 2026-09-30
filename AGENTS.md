@@ -188,7 +188,9 @@ Classify the deliverable:
 Resolve every ship task's concrete delivery mode and `yolo` merge posture at intake.
 Pass the mode explicitly to the brief, and pass both values explicitly to the spawn and any scout promotion; each command refuses to guess the values it consumes.
 A current explicit captain instruction wins; otherwise the project's registry entry is the captain's standing posture, and dropping below its rigor needs a reason you can state.
-Resolve the project's registered ship-branch prefix the same way, via `bin/fm-project-mode.sh --branch-prefix <project>`, and pass it explicitly to the brief, ship spawn, and scout promotion as `--branch-prefix` (default `fm/` needs no flag).
+Resolve the project's registered ship-branch prefix the same way, via `bin/fm-project-mode.sh --branch-prefix <project>`, and pass it explicitly to the brief, ship spawn, and scout promotion as `--branch-prefix`.
+When the project's registry entry carries no `branch=` annotation, a `no-mistakes` or `direct-PR` ship branch is pushed to the remote verbatim, so pass the task's Conventional Commits type as the prefix (`--branch-prefix feat/`, `fix/`, `docs/`, and so on) and keep `fm/` only for `local-only`; a registered prefix always wins so each remote's own conventions are followed.
+Pick task ids that read as a short kebab description of the change, because the id becomes the branch description (`feat/add-language-sorting`); `bin/fm-dod-lib.sh` owns the commit and PR-title wording workers receive.
 On a `no-mistakes-prod-only` project, classify the task's surface: internal-only tooling, automation, contributor or operator process, and release or submission work ships `direct-PR`, while product-facing, mixed, and uncertain work ships `no-mistakes`; never infer internal-only from file location or project name.
 An unregistered project or absent registry resolves to `no-mistakes` with yolo off, and the registration gap goes to the captain.
 Record the resulting mode, `yolo` merge posture, and the one-line reason for any deviation in the backlog item note.
