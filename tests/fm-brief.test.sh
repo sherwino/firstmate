@@ -1130,6 +1130,37 @@ test_ship_branch_prefix_defaults_to_legacy_fm() {
   pass "fm-brief.sh: --branch-prefix omitted defaults every ship mode to fm/<task-id>"
 }
 
+# Generated ship briefs carry the Conventional Commits and Conventional Branch
+# rules, and a type prefix yields a valid Conventional Branch name
+# (<type>/<short-kebab-description>) because the task id is already kebab-case.
+test_ship_brief_carries_conventional_naming() {
+  local home id mode brief type branch
+  home="$TMP_ROOT/conventional-naming-home"
+  mkdir -p "$home/data"
+  for mode in no-mistakes direct-PR local-only; do
+    id="brief-conv-$mode"
+    FM_HOME="$home" "$ROOT/bin/fm-brief.sh" "$id" some-proj --mode "$mode" >/dev/null 2>&1
+    brief="$home/data/$id/brief.md"
+    assert_grep '# Commit and PR conventions' "$brief" "$mode: brief has no conventions section"
+    assert_grep 'type(scope): summary' "$brief" "$mode: brief has no Conventional Commits shape"
+  done
+  assert_grep 'The PR title follows the same format' "$home/data/brief-conv-no-mistakes/brief.md" \
+    "no-mistakes: brief has no PR-title rule"
+  assert_no_grep 'conventionalbranch.org' "$home/data/brief-conv-local-only/brief.md" \
+    "local-only: brief has a remote branch-name rule for a branch that is never pushed"
+  for type in feat fix docs refactor chore; do
+    id="add-language-sorting-$type"
+    FM_HOME="$home" "$ROOT/bin/fm-brief.sh" "$id" some-proj --mode direct-PR --branch-prefix "$type/" >/dev/null 2>&1
+    brief="$home/data/$id/brief.md"
+    branch=$(sed -n 's/^Ship branch: //p' "$brief" | head -n 1)
+    assert_equals "$type/$id" "$branch" "$type: brief did not record the type-prefixed ship branch"
+    git check-ref-format --branch "$branch" >/dev/null || fail "$branch is not a valid git branch"
+    printf '%s' "$branch" | grep -Eq '^(feat|fix|docs|refactor|chore)/[a-z0-9]+(-[a-z0-9]+)*$' \
+      || fail "$branch is not a Conventional Branch name"
+  done
+  pass "fm-brief.sh: ship briefs carry the Conventional Commits and Conventional Branch rules"
+}
+
 # (b) + (c) A configured override must replace "fm/" everywhere the branch name is
 # rendered - the branch-creation command, the never-push rule text, the
 # definition-of-done text, and the status-message text - never partially.
@@ -1358,6 +1389,7 @@ test_scout_and_secondmate_scaffold
 test_scout_lavish_line_follows_presentation_floor
 test_home_brief_include_is_appended_last
 test_ship_branch_prefix_defaults_to_legacy_fm
+test_ship_brief_carries_conventional_naming
 test_ship_branch_prefix_override_is_consistent_across_modes
 test_ship_branch_prefix_empty_override_yields_bare_task_id
 test_branch_prefix_is_refused_where_it_does_not_apply

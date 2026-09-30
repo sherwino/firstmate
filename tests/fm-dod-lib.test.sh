@@ -382,6 +382,31 @@ test_pr_based_dod_draft_check_uses_gh_axi() {
   pass "PR-based DoD draft check uses gh-axi"
 }
 
+# Commit messages, PR titles, and the pushed branch follow Conventional Commits and
+# Conventional Branch; fm_ship_conventions is the single owner of that wording.
+test_ship_conventions_by_mode() {
+  local mode out
+  for mode in no-mistakes direct-PR local-only; do
+    out=$(fm_ship_conventions "$mode") || fail "$mode: fm_ship_conventions refused"
+    assert_contains "$out" "https://www.conventionalcommits.org/en/v1.0.0/" "$mode: commit rule missing"
+    assert_contains "$out" "type(scope): summary" "$mode: commit shape missing"
+  done
+  for mode in no-mistakes direct-PR; do
+    out=$(fm_ship_conventions "$mode")
+    assert_contains "$out" "https://conventionalbranch.org/" "$mode: pushed-branch rule missing"
+    assert_contains "$out" "The PR title follows the same format" "$mode: PR-title rule missing"
+    assert_contains "$out" "gh-axi pr edit <number> --title" "$mode: PR-title correction path missing"
+  done
+  out=$(fm_ship_conventions local-only)
+  assert_not_contains "$out" "conventionalbranch.org" "local-only: a never-pushed branch got a remote-name rule"
+  assert_not_contains "$out" "PR title" "local-only: a task with no PR got a PR-title rule"
+  out=$(fm_ship_conventions direct-PR gerrit)
+  assert_contains "$out" "Conventional Commits" "gerrit: commit rule missing"
+  assert_not_contains "$out" "PR title" "gerrit: a forge with no pull requests got a PR-title rule"
+  fm_ship_conventions bogus >/dev/null 2>&1 && fail "an unknown mode was rendered"
+  pass "fm_ship_conventions renders the commit, PR-title, and branch rules per mode"
+}
+
 test_scout_done_is_not_gated
 test_unpushed_ship_done_is_refused
 test_no_mistakes_prevalidation_done_is_not_gated
@@ -400,5 +425,6 @@ test_standalone_local_only_needs_project_ref
 test_non_done_lines_are_not_gated
 test_fenced_and_indented_captain_lines_are_not_intent
 test_pr_based_dod_draft_check_uses_gh_axi
+test_ship_conventions_by_mode
 
 echo "all fm-dod-lib tests passed"

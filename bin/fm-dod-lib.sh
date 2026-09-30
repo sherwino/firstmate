@@ -173,6 +173,32 @@ fm_ship_voice_rule() {
   printf '%s\n' '   Describe the work as part of the team in first-person plural ("we ran ...", "our merge of main", "left for reviewers").'
 }
 
+# fm_ship_conventions <no-mistakes|direct-PR|local-only> [<forge>]
+# Single owner of the commit-message, PR-title, and pushed-branch naming rules a
+# ship worker follows; bin/fm-brief.sh and bin/fm-promote.sh render it ahead of
+# the Definition of done. The pushed branch is the task's ship branch itself
+# (no-mistakes pushes the current branch name verbatim), so firstmate assigns the
+# Conventional Branch name at intake through the per-task branch prefix
+# (AGENTS.md section 7) and the worker only keeps it.
+fm_ship_conventions() {  # <mode> [<forge>]
+  local mode=$1 forge=${2:-none}
+  fm_forge_valid_for_mode "$forge" "$mode" fm_ship_conventions || return 1
+  case "$mode" in
+    no-mistakes|direct-PR|local-only) ;;
+    *) echo "error: fm_ship_conventions: unknown delivery mode '$mode'" >&2; return 1 ;;
+  esac
+  printf '%s\n' '# Commit and PR conventions'
+  # shellcheck disable=SC2016  # single quotes are deliberate: the backticks must stay literal
+  printf '%s\n' 'Every commit message follows Conventional Commits (https://www.conventionalcommits.org/en/v1.0.0/): `type(scope): summary`, with a lowercase type (feat, fix, docs, refactor, perf, test, build, ci, chore, revert) and, when the change sits in one package, plugin, or area, that name as the scope, for example `fix(quick-brick-player-brightcove): address issue with continue watching`.'
+  printf '%s\n' 'A commit or PR format the project itself documents takes precedence over this one.'
+  [ "$mode" != local-only ] || return 0
+  printf '%s\n' 'Your ship branch is the name the remote sees, and firstmate already named it to follow the branch convention of this project (Conventional Branch, https://conventionalbranch.org/, by default): never rename it or push under another name.'
+  [ "$forge" != gerrit ] || return 0
+  printf '%s\n' 'The PR title follows the same format, because a squash merge lands the PR title on the default branch.'
+  # shellcheck disable=SC2016  # single quotes are deliberate: the backticks must stay literal
+  printf '%s\n' 'After the PR exists, read its title back with `gh-axi pr view <number>`; when it is not a Conventional Commits title, correct it with `gh-axi pr edit <number> --title "<title>"`, a title the pipeline generated included.'
+}
+
 # Return 0 when a Task subsection still consists only of its scaffold
 # placeholder. A missing file and legacy briefs carry no such placeholders.
 fm_brief_task_placeholders_present() {  # <file>
