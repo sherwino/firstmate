@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Detect the agent harness this process tree runs on.
-# Usage: fm-harness.sh                  print own harness: claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|gemini|muse|rovo|omp|agy|devin|unknown
+# Usage: fm-harness.sh                  print own harness: claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|gemini|muse|rovo|omp|agy|devin|copilot|unknown
 #        fm-harness.sh crew             print the effective CREWMATE harness
 #                                        (config/crew-harness; "default" resolves to own)
 #        fm-harness.sh secondmate       print the harness the PRIMARY uses to launch
@@ -128,6 +128,14 @@ harness_marker() {
     echo omp
     return
   fi
+  # GitHub Copilot CLI sets COPILOT_CLI=1 on its tool subprocesses (verified,
+  # copilot 1.0.93, alongside COPILOT_AGENT_SESSION_ID and
+  # COPILOT_CLI_BINARY_VERSION). Tested before CLAUDECODE for cursor's reason
+  # above: an inherited CLAUDECODE must not rename a Copilot session when
+  # ancestry has nothing to arbitrate with. Copilot is verified as a PRIMARY
+  # only; bin/fm-spawn.sh has no copilot launch template, so it is never
+  # dispatched as a worker.
+  [ "${COPILOT_CLI:-}" = "1" ] && { echo copilot; return; }
   [ "${CLAUDECODE:-}" = "1" ] && { echo claude; return; }
   if [ "${PI_CODING_AGENT:-}" = "true" ]; then
     if [ "${FM_PI_HARNESS:-}" = pi-signed ]; then echo pi-signed; else echo pi; fi
@@ -239,6 +247,11 @@ harness_process_verdict() {  # <pid>
     # detected by ancestry alone.
     agy) echo "comm agy"; return ;;
     devin) echo "comm devin"; return ;;
+    # GitHub Copilot CLI's npm package launches a native per-platform binary
+    # whose process name is exactly `copilot` (verified, copilot 1.0.93 on
+    # macOS: node -> .../@github/copilot-darwin-arm64/copilot -> tool shell).
+    # Anchored, never *copilot*, so unrelated commands are not misread.
+    copilot) echo "comm copilot"; return ;;
     node*|python*)
       # Bare interpreter: match the harness name in its script path.
       args=$(ps -o args= -p "$pid" 2>/dev/null)
@@ -397,7 +410,7 @@ supervision_primary_pin() {
   local pin=${FM_SUPERVISION_PRIMARY_HARNESS:-}
   [ "${FM_SUPERVISION_ACTOR:-}" = branch ] && [ -n "$pin" ] || return 0
   case "$pin" in
-    claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|gemini|muse|rovo|omp|agy|devin)
+    claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|gemini|muse|rovo|omp|agy|devin|copilot)
       printf '%s\n' "$pin"
       ;;
     *)

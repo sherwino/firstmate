@@ -2236,6 +2236,10 @@ case "$ARG3" in
     harness_src='config/crew-harness'
   fi
   LAUNCH=$(launch_template "$HARNESS" "$KIND") || {
+    if [ "$HARNESS" = copilot ]; then
+      echo "error: copilot is verified as a primary harness only and has no worker launch template; set config/crew-harness (and config/secondmate-harness for secondmates) to a verified worker harness such as claude" >&2
+      exit 1
+    fi
     echo "error: no launch template for harness '$HARNESS' (from $harness_src or detection); pass a raw launch command to use an unverified adapter" >&2
     exit 1
   }
@@ -2243,6 +2247,10 @@ case "$ARG3" in
 *)
   HARNESS=$ARG3
   LAUNCH=$(launch_template "$HARNESS" "$KIND") || {
+    if [ "$HARNESS" = copilot ]; then
+      echo "error: copilot is verified as a primary harness only and has no worker launch template; pass a verified worker harness such as claude" >&2
+      exit 1
+    fi
     echo "error: unknown harness '$HARNESS'; pass a raw launch command to use an unverified adapter" >&2
     exit 1
   }
