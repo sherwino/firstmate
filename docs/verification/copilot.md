@@ -31,6 +31,7 @@ The rendered arm command passes `bin/fm-arm-pretool-check.sh`, and Copilot loads
 
 - Copilot as a crewmate, scout, or secondmate; `bin/fm-spawn.sh` refuses it.
 - A Firstmate turn-end guard for Copilot.
+- A Copilot session-open hook; [`sessionstart-nudge.md`](../sessionstart-nudge.md#copilot-cli) records the surface as uncovered.
 - Process identity on Linux or Windows builds of Copilot CLI.
 
 `tests/fm-copilot-harness.test.sh` pins the identity, lock, rendering, and worker-refusal logic portably.
