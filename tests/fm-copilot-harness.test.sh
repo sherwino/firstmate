@@ -6,7 +6,7 @@
 # Copilot's identity checks are HARNESS-DEPENDENT: the verdicts come from what
 # the vendor emits (a process name and a tool-subprocess marker). This suite
 # pins the LOGIC with real named processes so CI enforces it with no copilot
-# installed; docs/verification/supervision.md records the live evidence.
+# installed; docs/verification/copilot.md records the live evidence.
 #
 # The load-bearing contracts:
 #   1. COPILOT_CLI=1 names copilot, and the anchored process name `copilot` is
@@ -16,6 +16,8 @@
 #   3. The session lock accepts the exact copilot name and rejects decoys.
 #   4. The supervision renderer emits the copilot async-bash protocol.
 #   5. fm-spawn refuses copilot as a worker harness with an actionable message.
+#   6. A worker launched from a copilot primary has the inherited COPILOT_CLI
+#      cleared by the launch command fm-spawn types into its pane.
 set -u
 
 # shellcheck source=tests/fixtures.sh
@@ -108,7 +110,28 @@ test_spawn_refuses_copilot_worker() {
   pass "fm-spawn: copilot is refused as a worker with an actionable message"
 }
 
+test_spawn_clears_copilot_marker() {
+  local case_dir home proj wt fakebin id out status launch
+  case_dir="$TMP_ROOT/spawn-clear"
+  home="$case_dir/home"
+  proj="$case_dir/project"
+  wt="$case_dir/wt"
+  id="copilot-clear-x2"
+  fakebin=$(make_spawn_fakebin "$case_dir/fake" gh-axi gh claude)
+  fm_test_spawn_home "$home" claude
+  fm_test_spawn_brief "$home" "$id" brief
+  fm_git_worktree "$proj" "$wt" "fm/$id"
+  out=$(COPILOT_CLI=1 FM_FAKE_LAUNCH_LOG="$case_dir/launch.log" \
+    fm_test_run_spawn "$home" "$wt" "$fakebin" "$id" "$proj" --mode no-mistakes --yolo off)
+  status=$?
+  [ "$status" -eq 0 ] || fail "claude spawn under a copilot primary should succeed: $out"
+  launch=$(cat "$case_dir/launch.log")
+  assert_contains "$launch" "-u COPILOT_CLI" "worker launch must clear the inherited copilot marker: $launch"
+  pass "fm-spawn: a worker launch clears the inherited COPILOT_CLI marker"
+}
+
 test_detection
 test_lock_identity
 test_supervision_render
 test_spawn_refuses_copilot_worker
+test_spawn_clears_copilot_marker

@@ -37,7 +37,6 @@ Never type an interrupt key or exit command through `fm-send`, where routing-mar
 Trust handling is complete only when inspection proves the target started processing its instructions; delivery success alone is not proof.
 Muse, Gemini, AGY, and Devin are verified only for crewmate and scout work, never a secondmate or primary.
 Copilot is verified only as a primary, never a crewmate, scout, or secondmate.
-Copilot is verified only as a primary, never a crewmate, scout, or secondmate.
 
 ## Detection
 
