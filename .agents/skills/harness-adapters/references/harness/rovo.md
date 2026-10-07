@@ -29,7 +29,7 @@ Both layers matter for the same reason cursor's do: marker ordering covers a rov
 
 ## Launch and readiness
 
-The launch template clears `CLAUDECODE`, `PI_CODING_AGENT`, `GROK_AGENT`, and `FM_PI_HARNESS` inline (rovo's own foreign-marker exposure), and the shared outer wrap clears `CURSOR_AGENT`/`CURSOR_INVOKED_AS` like every other non-cursor harness.
+The launch template clears `CLAUDECODE`, `PI_CODING_AGENT`, `GROK_AGENT`, and `FM_PI_HARNESS` inline (rovo's own foreign-marker exposure), and the shared outer wrap in `../../../bin/fm-spawn.sh` clears the remaining foreign markers like every other non-cursor harness; that wrap owns the exact list.
 rovo launches BARE (`rovo run --yolo`, plus any `--model`/`--config-override` flags) and takes its brief only after the TUI comes up - the same launch-then-send shape as kimi, wired through the same shared readers (`fm_backend_capture`, `fm_backend_composer_state`, `fm_backend_send_text_submit`):
 
 1. **Readiness gate** (`rovo_wait_for_ready` in `../../../bin/fm-spawn.sh`): poll for the fresh-launch `Welcome to Rovo!` ASCII banner, falling back to composer-empty. The banner is the primary signal because the composer-empty fallback is weaker for rovo than for kimi - rovo's idle composer renders an inline placeholder chip whose luminance sits above the ghost-strip threshold (see "Composer ghost text" below), so it can read non-empty.
