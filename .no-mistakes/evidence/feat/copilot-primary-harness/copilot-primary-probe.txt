@@ -1,0 +1,234 @@
+FM_HOME=/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z
+markers: COPILOT_CLI=1 CLAUDECODE=unset COPILOT_CLI_BINARY_VERSION=1.0.93
+ancestry (pid comm):
+60525 bash
+60523 /bin/bash
+52606 /Users/sherwino/.asdf/installs/nodejs/22.22.3/lib/node_modules/@github/copilot/node_modules/@github/copilot-darwin-arm64/copilot
+52604 node
+52603 tmux
+
+$ bash bin/fm-harness.sh
+copilot
+[exit 0]
+
+$ bash bin/fm-harness.sh ancestry
+comm copilot
+[exit 0]
+
+$ env -u COPILOT_CLI bash bin/fm-harness.sh
+copilot
+[exit 0]
+
+$ bash bin/fm-harness.sh crew
+copilot
+[exit 0]
+
+$ bash -c . bin/fm-session-lock-lib.sh; fm_harness_ancestry_pids
+52606
+[exit 0]
+
+$ bin/fm-session-start.sh
+
+================================================================================
+SESSION START - /var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z
+================================================================================
+
+LOCK
+--------------------------------------------------------------------------------
+lock acquired: harness pid 52606
+
+BOOTSTRAP
+--------------------------------------------------------------------------------
+PRESENTATION_UNAVAILABLE: lavish-axi (requires >=0.1.77; install: npm install -g lavish-axi && lavish-axi setup hooks) - nonvisual work may proceed with plain-text decisions and reports; install or upgrade before using Lavish
+MISSING: quota-axi (install: npm install -g quota-axi)
+
+WAKE QUEUE
+--------------------------------------------------------------------------------
+(no queued wakes)
+================================================================================
+SUPERVISION OPERATING INSTRUCTIONS - primary harness: copilot
+================================================================================
+Current state:
+- Lock: held by this session; this session owns normal supervision unless away mode says otherwise.
+- Away/quiet mode: inactive.
+- X mode: inactive; use the default watcher cadence.
+- Ordinary wake: re-arm exactly one bin/fm-watch-arm.sh Copilot async bash command as directed below.
+
+Mode: GitHub Copilot CLI async-bash supervision.
+
+When this session owns supervision and away mode is not active:
+1. Drain first with `bin/fm-wake-drain.sh`.
+   After handling all emitted wakes and reconciling open decisions and unread status lines, run the exact `--ack-through` command printed as `WAKE_ACK_REQUIRED`; until then the work remains durable for idempotent re-handling after interruption.
+2. Source `/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z/config/x-mode.env` first when Relay is active.
+3. First cycle: arm with Copilot's tracked async `bash` tool, as its own call:
+
+   `bash` with `mode: "async"` (never `detach: true`) on:
+   `[ -f '/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z/config/x-mode.env' ] && . '/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z/config/x-mode.env'; exec bin/fm-watch-arm.sh`
+
+4. Read the arm's one-line status with `read_bash` after a short delay, and trust only that line.
+5. `watcher: started ...` or `watcher: attached ...` means a live cycle exists.
+   On attach, the async command follows verified identity-matched successors instead of exiting when the first cycle ends.
+6. Failure or missing cycle only: `watcher: FAILED ...` means supervision is down; fix and re-arm.
+7. After a successful start or attach status, end the turn.
+   The async arm remains the live wait until it returns an actionable wake or failure.
+8. Waiting is silent.
+9. Never use shell `&`, `nohup`, or `detach: true` for firstmate supervision.
+10. Never bundle the arm onto another command.
+
+Copilot CLI delivers a system notification when the async arm's shell exits.
+When that notification arrives for the arm:
+1. Run `bin/fm-wake-drain.sh` first.
+2. Optionally fetch the arm output with `read_bash` on the arm's shell id for the reason line.
+3. Handle `signal`, `stale`, `check`, or `heartbeat` using the harness-neutral contract in `AGENTS.md`.
+4. Ordinary wake: re-arm the next cycle with the same async `bin/fm-watch-arm.sh` call if the home still needs supervision, as `bin/fm-supervision-lib.sh` defines it.
+5. Do not invent a wake from an attach-status line alone.
+   Drain the queue and act only on real wake records, the drain's `OPEN DECISIONS` and `UNREAD STATUS` entries, or a real watcher reason line.
+   Re-arm attaches to an existing healthy cycle when one is already present and follows its verified successor chain.
+   See [`watcher-continuity.md`](../watcher-continuity.md) for the arm-layer successor and clean-close failure contract.
+
+Copilot CLI has no verified Firstmate turn-end guard, so the async arm is the only wake path; never end a turn while work is under way without a confirmed live arm.
+The async arm is attached to the Copilot session and ends when that session exits, so a restarted session re-arms after its session-start digest.
+Copilot is verified as a primary harness only; workers and secondmates need `config/crew-harness` and `config/secondmate-harness` naming a verified worker harness such as `claude`.
+
+
+================================================================================
+READ-ONCE CONTRACT
+================================================================================
+Everything below is printed in full for this session start: every state/*.meta,
+a compact data/backlog.md listing, a bounded tail of every state/*.status,
+data/projects.md, data/secondmates.md, data/captain.md, data/captain-shared.md,
+and data/learnings.md.
+Do NOT re-read any of them after reading this digest, and do NOT bulk-read
+data/backlog.md or state/*.status: re-reading everything defeats the entire
+point of this command.
+
+Go to a source directly only when:
+  - this digest flagged it ABSENT (then rebuild or create it per AGENTS.md),
+  - its contents looked unparseable or corrupt,
+  - an individual full status log is needed for older wake-event history, or a
+    status line was capped and its tail matters (each task's full log path is
+    printed with its tail),
+  - a full task body is needed (bin/fm-tasks-axi.sh show <id> --full, or data/backlog.md),
+  - the backlog listing disclosed omitted queued items and this turn needs them,
+  - the NETWORK CHECKS section reported its checks still IN PROGRESS and this
+    turn needs their verdict (bin/fm-startup-network.sh report),
+  - or a STARTUP TRUNCATED banner named the stage that would have printed it, in
+    which case that stage's sources were never emitted and must be reconciled.
+
+================================================================================
+FLEET STATE
+================================================================================
+
+data/backlog.md
+--------------------------------------------------------------------------------
+ABSENT
+
+Work under way (state/*.meta)
+--------------------------------------------------------------------------------
+(none)
+
+Orphan status logs (state/*.status without matching .meta)
+--------------------------------------------------------------------------------
+(none)
+
+AFK
+--------------------------------------------------------------------------------
+absent
+
+================================================================================
+NETWORK CHECKS
+================================================================================
+completed off the startup path in 3s: GitHub authentication, dead-secondmate relaunch, secondmate convergence, pending handoff delivery, project clone refresh with its drift reporting, and inactive terminal-outcome reconciliation.
+(silent - no problems found)
+
+================================================================================
+CONTEXT
+================================================================================
+
+data/projects.md
+--------------------------------------------------------------------------------
+ABSENT
+
+data/secondmates.md
+--------------------------------------------------------------------------------
+ABSENT
+
+data/captain.md
+--------------------------------------------------------------------------------
+ABSENT
+
+data/captain-shared.md (shared, main-authoritative, read-only in secondmate homes)
+--------------------------------------------------------------------------------
+ABSENT
+
+data/learnings.md
+--------------------------------------------------------------------------------
+ABSENT
+
+================================================================================
+NEXT STEP
+================================================================================
+Follow the supervision operating instructions block above for harness 'copilot'.
+This script never starts supervision itself.
+
+The digest above is complete for this session start. The READ-ONCE CONTRACT
+section near the top of it governs what may still be read from disk.
+[exit 0]
+
+$ bin/fm-supervision-instructions.sh
+================================================================================
+SUPERVISION OPERATING INSTRUCTIONS - primary harness: copilot
+================================================================================
+Current state:
+- Lock: held by this session; this session owns normal supervision unless away mode says otherwise.
+- Away/quiet mode: inactive.
+- X mode: inactive; use the default watcher cadence.
+- Ordinary wake: re-arm exactly one bin/fm-watch-arm.sh Copilot async bash command as directed below.
+
+Mode: GitHub Copilot CLI async-bash supervision.
+
+When this session owns supervision and away mode is not active:
+1. Drain first with `bin/fm-wake-drain.sh`.
+   After handling all emitted wakes and reconciling open decisions and unread status lines, run the exact `--ack-through` command printed as `WAKE_ACK_REQUIRED`; until then the work remains durable for idempotent re-handling after interruption.
+2. Source `/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z/config/x-mode.env` first when Relay is active.
+3. First cycle: arm with Copilot's tracked async `bash` tool, as its own call:
+
+   `bash` with `mode: "async"` (never `detach: true`) on:
+   `[ -f '/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z/config/x-mode.env' ] && . '/var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z/config/x-mode.env'; exec bin/fm-watch-arm.sh`
+
+4. Read the arm's one-line status with `read_bash` after a short delay, and trust only that line.
+5. `watcher: started ...` or `watcher: attached ...` means a live cycle exists.
+   On attach, the async command follows verified identity-matched successors instead of exiting when the first cycle ends.
+6. Failure or missing cycle only: `watcher: FAILED ...` means supervision is down; fix and re-arm.
+7. After a successful start or attach status, end the turn.
+   The async arm remains the live wait until it returns an actionable wake or failure.
+8. Waiting is silent.
+9. Never use shell `&`, `nohup`, or `detach: true` for firstmate supervision.
+10. Never bundle the arm onto another command.
+
+Copilot CLI delivers a system notification when the async arm's shell exits.
+When that notification arrives for the arm:
+1. Run `bin/fm-wake-drain.sh` first.
+2. Optionally fetch the arm output with `read_bash` on the arm's shell id for the reason line.
+3. Handle `signal`, `stale`, `check`, or `heartbeat` using the harness-neutral contract in `AGENTS.md`.
+4. Ordinary wake: re-arm the next cycle with the same async `bin/fm-watch-arm.sh` call if the home still needs supervision, as `bin/fm-supervision-lib.sh` defines it.
+5. Do not invent a wake from an attach-status line alone.
+   Drain the queue and act only on real wake records, the drain's `OPEN DECISIONS` and `UNREAD STATUS` entries, or a real watcher reason line.
+   Re-arm attaches to an existing healthy cycle when one is already present and follows its verified successor chain.
+   See [`watcher-continuity.md`](../watcher-continuity.md) for the arm-layer successor and clean-close failure contract.
+
+Copilot CLI has no verified Firstmate turn-end guard, so the async arm is the only wake path; never end a turn while work is under way without a confirmed live arm.
+The async arm is attached to the Copilot session and ends when that session exits, so a restarted session re-arms after its session-start digest.
+Copilot is verified as a primary harness only; workers and secondmates need `config/crew-harness` and `config/secondmate-harness` naming a verified worker harness such as `claude`.
+
+[exit 0]
+
+$ bin/fm-spawn.sh probe-task-x1 /Users/sherwino/.no-mistakes/worktrees/2ddb1ac601a2/01M4BH0NP424A1DQ6DM5D60PMY --mode local-only --yolo off
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z
+error: copilot is verified as a primary harness only and has no worker launch template; set config/crew-harness (and config/secondmate-harness for secondmates) to a verified worker harness such as claude
+[exit 1]
+
+$ bin/fm-spawn.sh probe-task-x1 /Users/sherwino/.no-mistakes/worktrees/2ddb1ac601a2/01M4BH0NP424A1DQ6DM5D60PMY --harness copilot --mode local-only --yolo off
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /var/folders/67/y2s_s_lj0p3c64_rj5stb5000000gn/T//fm-lab.ahtS0z
+error: copilot is verified as a primary harness only and has no worker launch template; pass a verified worker harness such as claude
+[exit 1]
